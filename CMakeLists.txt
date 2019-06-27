@@ -3,4 +3,4 @@ project(HÜ2 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(HÜ2 main.c)
+add_executable(HÜ2 hu2.c hu2.h)
