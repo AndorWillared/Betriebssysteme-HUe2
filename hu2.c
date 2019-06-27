@@ -7,9 +7,12 @@ int main(int argc, char *argv[]) {
     char* partitionName;
     FILE *disk;
 
+    Block blocks[];
+    Inode inodes[];
+
     /*Exits if number of arguments doesn't equal 3 (progName, fileName, partitionName)*/
     if(argc!=3) {
-        error("wrong number of arguments");
+        exit(ERR_WRONG_CALL); /*Fehler a)*/
     }
 
     diskName = argv[1];
@@ -17,12 +20,13 @@ int main(int argc, char *argv[]) {
 
     disk = fopen(diskName, "rb");
     if(disk==NULL) {
-        error("cannot open disk image file '%s'", diskName);
+        exit(ERR_IMG_NOT_FOUND) /*Fehler b)*/
     }
     fseek(disk, 1 * SECTOR_SIZE, SEEK_SET);
     if(fread(ptr, 1 SECTOR_SIZE, disk) != SECTOR_SIZE){
-        error("cannot read partition table from disk image '%s'", diskName);
+        exit(ERR_FILE_IO) /*Fehler c)*/
     }
+
 
 
 
