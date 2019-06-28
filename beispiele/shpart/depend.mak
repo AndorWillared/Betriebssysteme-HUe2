@@ -1,0 +1,1 @@
+shpart.o: shpart.c

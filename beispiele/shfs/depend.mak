@@ -1,0 +1,1 @@
+shfs.o: shfs.c
