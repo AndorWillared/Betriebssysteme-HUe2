@@ -32,6 +32,7 @@
 #define ERR_OTHER_FS        99  /**/
 
 /*CONSTANTS*/
+#define MAX_INT 32.767
 #define SECTOR_SIZE 512
 #define NPE (SECTOR_SIZE / sizeof(PartEntry))
 #define DESCR_SIZE;
