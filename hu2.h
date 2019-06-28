@@ -2,8 +2,8 @@
 // Created by Andor on 25.06.2019.
 //
 
-#ifndef HÜ2_HU2_H
-#define HÜ2_HU2_H
+#ifndef HU2_H
+#define HU2_H
 
 /*EXIT-CODES*/
 /*Todo: Fehlerfälle als kommentare einfügen!!!*/
@@ -34,12 +34,15 @@
 /*CONSTANTS*/
 #define MAX_INT 32.767
 #define SECTOR_SIZE 512
-#define NPE (SECTOR_SIZE / sizeof(PartEntry))
-#define DESCR_SIZE;
+#define NPE (SECTOR_SIZE / sizeof(ParEntry))
+#define DESCR_SIZE 20
 #define SECTOR_SIZE	512	/* disk sector size in bytes */
 #define BLOCK_SIZE	4096	/* disk block size in bytes */
 #define SPB		(BLOCK_SIZE / SECTOR_SIZE)
 
+
+#define NICFREE		500	/* number of free blocks in superblock */
+#define NICINOD		500	/* number of free inodes in superblock */
 
 /*TYPES*/
 typedef struct {
@@ -60,4 +63,4 @@ typedef struct {
 
 ParEntry ptr[NPE];
 
-#endif //HÜ2_HU2_H
+#endif //HU2_H
