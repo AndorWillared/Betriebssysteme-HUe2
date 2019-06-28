@@ -36,6 +36,9 @@
 #define SECTOR_SIZE 512
 #define NPE (SECTOR_SIZE / sizeof(PartEntry))
 #define DESCR_SIZE;
+#define SECTOR_SIZE	512	/* disk sector size in bytes */
+#define BLOCK_SIZE	4096	/* disk block size in bytes */
+#define SPB		(BLOCK_SIZE / SECTOR_SIZE)
 
 
 /*TYPES*/

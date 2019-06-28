@@ -10,7 +10,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3f8bb03d-2717-4e4d-a255-8f4010c0aa74" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hu2.c" beforeDir="false" afterPath="$PROJECT_DIR$/hu2.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hu2.h" beforeDir="false" afterPath="$PROJECT_DIR$/hu2.h" afterDir="false" />
     </list>
@@ -29,8 +28,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/hu2.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="47" column="4" lean-forward="true" selection-end-line="64" selection-end-column="1" />
+            <state relative-caret-position="-1428">
+              <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
             </state>
           </provider>
         </entry>
@@ -38,8 +37,17 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/hu2.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="260">
-              <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+            <state relative-caret-position="17">
+              <caret line="37" column="19" lean-forward="true" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/beispiele/shfs/shfs.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-170">
+              <caret line="583" column="9" selection-start-line="583" selection-start-column="9" selection-end-line="583" selection-end-column="9" />
             </state>
           </provider>
         </entry>
@@ -53,16 +61,16 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/main.c" />
+        <option value="$PROJECT_DIR$/beispiele/shfs/shfs.c" />
         <option value="$PROJECT_DIR$/hu2.h" />
         <option value="$PROJECT_DIR$/hu2.c" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="907" />
-    <option name="y" value="-17" />
-    <option name="width" value="659" />
-    <option name="height" value="401" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="949" />
+    <option name="width" value="980" />
+    <option name="height" value="1031" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -76,6 +84,23 @@
             <path>
               <item name="HÜ2" type="b2602c69:ProjectViewProjectNode" />
               <item name="HÜ2" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HÜ2" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HÜ2" type="462c0819:PsiDirectoryNode" />
+              <item name="beispiele" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HÜ2" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HÜ2" type="462c0819:PsiDirectoryNode" />
+              <item name="beispiele" type="462c0819:PsiDirectoryNode" />
+              <item name="shfs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HÜ2" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HÜ2" type="462c0819:PsiDirectoryNode" />
+              <item name="beispiele" type="462c0819:PsiDirectoryNode" />
+              <item name="shpart" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -116,18 +141,18 @@
       <updated>1561457690124</updated>
       <workItem from="1561457691293" duration="4219000" />
       <workItem from="1561624502393" duration="3042000" />
-      <workItem from="1561724930840" duration="1596000" />
+      <workItem from="1561724930840" duration="4488000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8857000" />
+    <option name="totallyTimeSpent" value="11749000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
+    <frame x="633" y="0" width="653" height="687" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1271255" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.2360877" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -138,7 +163,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.08525755" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.40852576" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.3285968" />
@@ -155,17 +180,31 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+    <entry file="file://$PROJECT_DIR$/beispiele/shpart/shpart.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1598">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/beispiele/shfs/shfs.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-170">
+          <caret line="583" column="9" selection-start-line="583" selection-start-column="9" selection-end-line="583" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/hu2.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="48" column="4" selection-start-line="48" selection-start-column="4" selection-end-line="48" selection-end-column="4" />
+        <state relative-caret-position="17">
+          <caret line="37" column="19" lean-forward="true" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/hu2.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="47" column="4" lean-forward="true" selection-end-line="64" selection-end-column="1" />
+        <state relative-caret-position="-1428">
+          <caret line="2" column="16" selection-start-line="2" selection-start-column="16" selection-end-line="2" selection-end-column="16" />
         </state>
       </provider>
     </entry>
