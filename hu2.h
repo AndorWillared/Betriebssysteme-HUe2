@@ -54,13 +54,4 @@ typedef struct {
     unsigned int refcount;
 } Inode;
 
-typedef struct {
-    unsigned int type;
-    unsigned int start;
-    unsigned int size;
-    char descr[DESCR_SIZE];
-} ParEntry;
-
-ParEntry ptr[NPE];
-
 #endif //HU2_H

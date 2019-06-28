@@ -10,7 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3f8bb03d-2717-4e4d-a255-8f4010c0aa74" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/hu2" beforeDir="false" afterPath="$PROJECT_DIR$/hu2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hu2.c" beforeDir="false" afterPath="$PROJECT_DIR$/hu2.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hu2.h" beforeDir="false" afterPath="$PROJECT_DIR$/hu2.h" afterDir="false" />
     </list>
@@ -29,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/hu2.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
-              <caret line="192" column="21" selection-start-line="192" selection-start-column="16" selection-end-line="192" selection-end-column="21" />
+            <state relative-caret-position="1028">
+              <caret line="196" column="5" lean-forward="true" selection-start-line="196" selection-start-column="5" selection-end-line="196" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -38,8 +38,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/hu2.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="52" column="16" lean-forward="true" selection-start-line="52" selection-start-column="16" selection-end-line="52" selection-end-column="16" />
+            <state relative-caret-position="331">
+              <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
             </state>
           </provider>
         </entry>
@@ -56,8 +56,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/beispiele/shfs/shfs.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="9" selection-end-column="17" />
+            <state relative-caret-position="348">
+              <caret line="521" column="28" selection-start-line="521" selection-start-column="28" selection-end-line="521" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -78,9 +78,11 @@
       <find>fsize</find>
       <find>checkSuperB</find>
       <find>strtoul</find>
-      <find>PartEnt</find>
       <find>exit</find>
       <find>idiot</find>
+      <find>PartEnt</find>
+      <find>ptr</find>
+      <find>ptr</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -97,7 +99,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="949" />
+    <option name="x" value="-11" />
     <option name="width" value="980" />
     <option name="height" value="1031" />
   </component>
@@ -170,12 +172,12 @@
       <updated>1561457690124</updated>
       <workItem from="1561457691293" duration="4219000" />
       <workItem from="1561624502393" duration="3042000" />
-      <workItem from="1561724930840" duration="15254000" />
+      <workItem from="1561724930840" duration="17010000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="22515000" />
+    <option name="totallyTimeSpent" value="24271000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
@@ -192,7 +194,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Database Changes" order="7" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.40674955" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.41261262" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="CMake" order="11" weight="0.3285968" />
@@ -209,13 +211,6 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/beispiele/shfs/shfs.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="9" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/beispiele/shpart/shpart.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
@@ -225,15 +220,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/hu2.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="52" column="16" lean-forward="true" selection-start-line="52" selection-start-column="16" selection-end-line="52" selection-end-column="16" />
+        <state relative-caret-position="331">
+          <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/beispiele/shfs/shfs.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="348">
+          <caret line="521" column="28" selection-start-line="521" selection-start-column="28" selection-end-line="521" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/hu2.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
-          <caret line="192" column="21" selection-start-line="192" selection-start-column="16" selection-end-line="192" selection-end-column="21" />
+        <state relative-caret-position="1028">
+          <caret line="196" column="5" lean-forward="true" selection-start-line="196" selection-start-column="5" selection-end-line="196" selection-end-column="5" />
         </state>
       </provider>
     </entry>

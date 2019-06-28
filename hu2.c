@@ -148,6 +148,7 @@ int main(int argc, char *argv[]) {
     unsigned int partitionNum;
     FILE *disk;
 
+    unsigned char partTable[SECTOR_SIZE];
     unsigned char *ptptr;
     unsigned int fsSize;
     unsigned int partType;
@@ -172,14 +173,14 @@ int main(int argc, char *argv[]) {
 
     printf("hallo ich lebe");
     fseek(disk, 1 * SECTOR_SIZE, SEEK_SET);
-    if(fread(ptr, 1, SECTOR_SIZE, disk) != SECTOR_SIZE){
+    if(fread(partTable, 1, SECTOR_SIZE, disk) != SECTOR_SIZE){
         printf("idiot3\n");/*Todo*/
         exit(ERR_FILE_IO); /*Fehler 2c)*/
     }
     /*Exits if partNum is to big or argv[1] is not an int*/
     char *rest;
-    long arg2 = strtoul(argv[1], &rest, 10);
-    if(partitionNum > 15 || partitionNum < 0 || *rest != '\0'){
+    long arg2 = strtoul(argv[2], &rest, 10);
+    if(arg2 > 15 || arg2 < 0 || *rest != '\0'){
         printf("idiot4\n");/*Todo*/
         exit(ERR_ILL_PART_NUM); /*Fehler 2d)*/
     } else {
@@ -187,10 +188,11 @@ int main(int argc, char *argv[]) {
     }
     printf("#DEBUG| partitionNum: %d\n",arg2);/*Todo: DEBUG*/
 
-    ptptr = ptr + (partitionNum * 32);
+    ptptr = partTable + partitionNum * 32;
     partType = get4Bytes(ptptr + 0);
+    /*todo: check if partitionEntry is empty*/
     if ((partType & 0x7FFFFFFF) != 0x00000058) {
-        printf("idiot5\n");/*Todo*/
+        printf("No EOS32 FS!\n");/*Todo*/
         exit(ERR_PART_NO_EOS); /*Fehler 2e)*/
     }
 
