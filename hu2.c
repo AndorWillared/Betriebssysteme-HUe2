@@ -1,55 +1,5 @@
-//special files auch noch überprüfen, nur erster block ist KEIN "echter" Block
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <time.h>
-#include <string.h>
 #include "hu2.h"
 
-#define SECTOR_SIZE	512	/* disk sector size in bytes */
-#define BLOCK_SIZE	4096	/* disk block size in bytes */
-#define SPB		(BLOCK_SIZE / SECTOR_SIZE)
-#define LINE_SIZE	100	/* input line buffer size in bytes */
-#define LINES_PER_BATCH	32	/* number of lines output in one batch */
-
-#define NICINOD		500	/* number of free inodes in superblock */
-#define NICFREE		500	/* number of free blocks in superblock */
-#define INOPB		64	/* number of inodes per block */
-#define DIRPB		64	/* number of directory entries per block */
-#define DIRSIZ		60	/* max length of path name component */
-
-#define IFMT		070000	/* type of file */
-#define IFREG		040000	/* regular file */
-#define IFDIR		030000	/* directory */
-#define IFCHR		020000	/* character special */
-#define IFBLK		010000	/* block special */
-#define IFFREE		000000	/* reserved (indicates free inode) */
-#define ISUID		004000	/* set user id on execution */
-#define ISGID		002000	/* set group id on execution */
-#define ISVTX		001000	/* save swapped text even after use */
-#define IUREAD		000400	/* user's read permission */
-#define IUWRITE		000200	/* user's write permission */
-#define IUEXEC		000100	/* user's execute permission */
-#define IGREAD		000040	/* group's read permission */
-#define IGWRITE		000020	/* group's write permission */
-#define IGEXEC		000010	/* group's execute permission */
-#define IOREAD		000004	/* other's read permission */
-#define IOWRITE		000002	/* other's write permission */
-#define IOEXEC		000001	/* other's execute permission */
-
-#define REG        1
-#define DIR        2
-#define CHR        3
-#define BLK        4
-
-#define DIRECT    11
-#define SINGLE    12
-#define DOUBLE    13
-#define SUBDIRECT 14
-
-#define B_LIST      21
-#define B_FILE      22
 
 /*ERROR Functions*/
 void fatalError(int err_code, char * err_msg);
@@ -68,10 +18,10 @@ void checkSuperBlock(unsigned char *p);
 void checkBlock(unsigned int addr, int type, int flag);
 void checkInode(unsigned char *p, unsigned int addr, int doRecursion);
 void incrementBlock(unsigned int addr, int type);
-  
-/* Debug outputs can be deleted: printf("#DEBUG| OUTPUT\n",VARS);/*Todo: DEBUG*\/*/
 
 unsigned int fsStart; /* file system start sector *//*Todo: Why global, maybe later?*/
+
+FILE *disk;	           /*the disk to check*/
 
 Block * blocks;
 unsigned int numBlocks;
@@ -82,7 +32,9 @@ unsigned int freeblks;	/*num of free blocks, set in superBlock check -> verify a
 unsigned int freeinos; 	/*num of free inodes, set: superBlock -> verify: later*/
 unsigned int numberOfEntriesinFreeinos;	/*num of entries in free inode list, set: superBlock -> verfy: later*/
 
-FILE *disk;	           /*the disk to check*/
+unsigned int specialBlockEnd;        /*indicates where the "special" bocks end -> start block check from there*/
+
+unsigned int maxSize;               // the max possible filesize for a given inode, manipulated in checkBlock, read in checkInode
 
 void fatalError(int err_code, char * err_msg) {
   	printf("#ERROR| %d  -> \"%s\" \n", err_code, err_msg);
@@ -104,6 +56,16 @@ void debugPrintBlocks(void){
       printf("#DEBUG| Block[%d] -> (%d , %d) \n", i, blocks[i].filerefs, blocks[i].listrefs);/*Todo: DEBUG*/
     }
   }
+}
+
+void debugPrintInodes(void){
+    printf("#DEBUG| Prints all inodes in inode-array %d\n",numInodes);/*Todo: DEBUG*/
+    for(int i = 0; i < numInodes*INOPB; i++){
+        Inode *x = &inodes[i]; //Todo: Block *x = &blocks[i]; OR Block x = blocks[i]; ?
+        if(x->refcount>0){
+            printf("#DEBUG| Inode[%d] -> (%d) \n", i, x->refcount);/*Todo: DEBUG*/
+        }
+    }
 }
 
 void readBlock(FILE *disk, unsigned int blockNum, unsigned char *blockBuffer) {
@@ -138,8 +100,6 @@ void checkFreeBlock(unsigned int addr) {
         p += 4;
         if (i < nfree && addr != 0) {      
             incrementBlock(addr,B_LIST);
-            Block *x = &blocks[addr];
-            printf("#DEBUG| 2. x.listrefs = %d \n", x->listrefs);/*Todo: DEBUG*/
             printf("#DEBUG| %s block[%3d] = %u (0x%X)\n", i == 0 ? "link" : "free", i, addr, addr);/*Todo: DEBUG*/
            	if(i == 0) {
                 checkFreeBlock(addr);    //TODO: errrrr
@@ -164,13 +124,8 @@ void checkSuperBlock(unsigned char *p){
 
     unsigned int fsize;
     unsigned int isize;
-    unsigned int freeblks;
-    unsigned int freeinos;
     unsigned int ninode;
-    unsigned int ino;
 
-    /*magicNum = get4Bytes(p);
-    /*Todo: kann man die magic number überprüfen?*/
     p += 4; /*skip magic number */
     fsize = get4Bytes(p); //printf("#DEBUG| file system size = %u (0x%X) blocks\n", fsize, fsize);/*Todo: DEBUG*/
     
@@ -182,35 +137,31 @@ void checkSuperBlock(unsigned char *p){
     fatalErrorIf(!blocks,ERR_MALLOC,"Insufficient memory at block allocation");
     
     p += 4;
-    isize = get4Bytes(p); //printf("#DEBUG| inode list size  = %u (0x%X) blocks\n", isize, isize); /*Todo: DEBUG*/
+    isize = get4Bytes(p);
+    //printf("#DEBUG| inode list size  = %u (0x%X) blocks\n", isize, isize); /*Todo: DEBUG*/
 
   	/*Initialisation of inodes*/
     numInodes = isize;
-  	inodes = (Inode *) malloc(numInodes * sizeof(Inode));//Todo: We should read numInodes from the inode-table later!
+  	inodes = (Inode *) malloc(INOPB * numInodes * sizeof(Inode));//Todo: We should read numInodes from the inode-table later!
   	fatalErrorIf(!inodes,ERR_MALLOC,"Insufficient memory at inode allocation");
-    
+
+  	specialBlockEnd = isize + 1 + 1;        // skip ALL inodeBlocks + the bootblock + superblock later
     
     p += 12;
-    ninode = get4Bytes(p); //printf("#DEBUG|entries in free inode list = %u (0x%X)\n", ninode, ninode);/*Todo: DEBUG*/
-    p += 4;
-    for (int i = 0; i < NICINOD; i++) {
-        ino = get4Bytes(p);
-        p += 4;
-        if (i < ninode) { //printf("#DEBUG| free inode[%3d] = %u (0x%X)\n", i, ino, ino);/*Todo: DEBUG*/
-        }
-    }
+    ninode = get4Bytes(p);
+    p += 4;     //ninode
+
+    p+= 4* NICINOD;     //ino (s)
 
   	/*Todo kann das nich auch in die checkFreeBlock methode? V*/
-    nfree = get4Bytes(p); //printf("#DEBUG| number of entries in free block list = %u (0x%X)\n", nfree, nfree);/*Todo: DEBUG*/
-    p += 4;
+    nfree = get4Bytes(p);
+    p += 4;       // nfree
     for (int i = 0; i < NICFREE; i++) {
         free = get4Bytes(p);
         p += 4;
         if (i < nfree) {
-            printf("#DEBUG| %s block[%3d] = %u (0x%X)\n",
-                   i == 0 ? "link" : "free", i, free, free);/*Todo: DEBUG*/
           	if(i == 0) {
-                checkFreeBlock(free);    //TODO: errrrr
+                checkFreeBlock(free);    // block 0 is freeBlock
           	}
       	}
     }
@@ -218,38 +169,38 @@ void checkSuperBlock(unsigned char *p){
 }
 
 void checkBlock(unsigned int addr, int type, int flag){
-  	if(addr == 0){ printf("     - is not used!\n"); return;}
+  	if(addr == 0) return;
     unsigned char blockBuffer[BLOCK_SIZE];
     unsigned int ino;
     unsigned char * p;
     unsigned char * ino_p;
-	
+
+    maxSize += BLOCK_SIZE;              //increment maximum file size by one block
+
   	incrementBlock(addr,B_FILE);		//increment file-counter of "old" address
 
   	readBlock(disk, addr, blockBuffer);
   
-	p = blockBuffer; 
+	p = blockBuffer;
   
     if(type==DOUBLE) {
-      	printf("Checking double indirect blocks \n");
       	for (int i = 0; i < BLOCK_SIZE/4; i++) {
           	checkBlock(get4Bytes(p), SINGLE, flag); 
           	p+=4;
         }
     } else if(type==SINGLE) {
-        printf("Checking single indirect blocks \n");      
       	for (int i = 0; i < BLOCK_SIZE/4; i++) {
           	checkBlock(get4Bytes(p), DIRECT, flag); 
           	p+=4;
         }
     } else if(type==DIRECT) {
-        printf("Checking direct blocks \n");
-        
         if(flag==DIR) {
           
           	for (int i = 0; i < DIRPB; i++) {
                 unsigned char ino_blockBuffer[BLOCK_SIZE];
               	ino = get4Bytes(p);
+
+              	printf("Die Inode: %u \n",ino);
               	
               	readBlock(disk, 2+ino/INOPB, ino_blockBuffer);
               	ino_p = ino_blockBuffer;
@@ -266,63 +217,99 @@ void checkBlock(unsigned int addr, int type, int flag){
 void checkInode(unsigned char *p, unsigned int inID, int doRecursion){
     unsigned int mode;
   	unsigned int addr;
+  	unsigned int size;
   	int type;
+
     mode = get4Bytes(p);
- 
-  	
-  	p += 32; //skip mode//nlink//uid//gid//tim//tim//tim//size
+
+    p+= 28; // skip until size: mode//nlink//uid//gid//tim//tim//tim//
+
+    size = get4Bytes(p);
+
+    maxSize = 0;        // reset maxSize for current inode
+
+    p+=4; //size
 	
   	if((mode & IFMT) == IFREG) {
       	printf("#DEBUG| inode is REG\n");//Todo: DEBUG
       	type = REG;
       	Inode *x = &inodes[inID];
         x->refcount +=1;
+
+        printf("Die Inode: %u, hat den refcount %d \n",inID, x->refcount);
     } else if((mode & IFMT) == IFDIR) {
       	printf("#DEBUG| inode is DIR\n");//Todo: DEBUG
       	type = DIR;
       	Inode *x = &inodes[inID];
         x->refcount +=1;
-    } else {
-      	printf("#DEBUG| inode is neither REG nor DIR\n");//Todo: DEBUG
-    }
+
+        printf("Die Inode: %u, hat den refcount %d \n",inID, x->refcount);
+    } else if(( (mode & IFMT) == IFCHR) || ((mode & IFMT) == IFBLK)){
+        printf("#DEBUG| inode is BLOCK or CHAR\n");//Todo: DEBUG
+        type = SPE; // BLK or CHR
+        Inode *x = &inodes[inID];
+        x->refcount +=1;
+
+        printf("Die Inode: %u, hat den refcount %d \n",inID, x->refcount);
+  	}
   	
   	if(doRecursion) {
       	//Direct blocks
         for (int j = 0; j < 6; j++) {
           addr = get4Bytes(p);
           p += 4;
-          if (mode != 0) {
-              if((mode & IFMT) == IFDIR || (mode & IFMT) == IFREG) checkBlock(addr, DIRECT, type);
-            }
+          if(type == DIR || type == REG) {
+              printf("checking direct \n");
+              checkBlock(addr, DIRECT, type);
+          }
         }
       
       	//Single indirect block
         addr = get4Bytes(p);
         p += 4;
-        if (mode != 0) {
-          if((mode & IFMT) == IFDIR || (mode & IFMT) == IFREG){
-              printf("Checking single indirect !!!!! \n");
-              checkBlock(addr, SINGLE, type);
-              
-          } 
+        if(type == DIR || type == REG){
+            printf("checking single \n");
+            checkBlock(addr, SINGLE, type);
         }
-      
+
       	//Double indirect block
         addr = get4Bytes(p);
         p += 4;
-        if (mode != 0) {
-          if((mode & IFMT) == IFDIR || (mode & IFMT) == IFREG){
-              printf("Checking double indirect !!!!! \n");
-              checkBlock(addr, DOUBLE, type);
-          } 
+        if(type == DIR || type == REG) {
+            printf("checking double \n");
+            checkBlock(addr, DOUBLE, type);
         }
+  	}else{
+
+        for (int j = 0; j < 6; j++) {
+            addr = get4Bytes(p);
+            p += 4;
+            if(type == DIR || type == REG) printf("Adresse: %d\n",addr);
+        }
+
+        //Single indirect block
+        addr = get4Bytes(p);
+        p += 4;
+        if(type == DIR || type == REG) printf("Adresse: %d\n",addr);
+
+        //Double indirect block
+        addr = get4Bytes(p);
+        p += 4;
+        if(type == DIR || type == REG) printf("Adresse: %d\n",addr);
   	}
+
+  	//check size
+
+  	printf("The size is: %d, while max size is: %d \n", size, maxSize);
+
+  //	if(type!= SPE) fatalErrorIf(size > maxSize, ERR_FILE_SIZE, "File is larger than indicated by block size");
+
 }
 
 //increments the File or List field of specified block
 
 void incrementBlock(unsigned int addr, int type){
-	Block *x =  &blocks[addr]; 
+	Block *x =  &blocks[addr];
 
    	switch(type) {
        case B_FILE: 
@@ -336,6 +323,133 @@ void incrementBlock(unsigned int addr, int type){
    	}
 }
 
+
+void checkBlockList(){
+
+        printf("#DEBUG| Prints all used Blocks in blocks-array %d\n",numBlocks);/*Todo: DEBUG*/
+        for(int i = specialBlockEnd; i < numBlocks; i++){
+            Block *x = &blocks[i];
+
+            fatalErrorIf(x->filerefs == 0 && x->listrefs == 0,ERR_NOT_FILE_LIST,"Block is neither free nor in file !");
+
+            fatalErrorIf(x->filerefs == 1 && x->listrefs == 1,ERR_IN_FILE_LIST,"Block is both in free list and a file !");
+
+            fatalErrorIf(x->listrefs > 1,ERR_MULTI_FILE,"Block has multiple occurences in free list !");
+
+            fatalErrorIf(x->filerefs > 1,ERR_MULTI_LIST,"Block has multiple occurences in file(s) !");
+
+            //prints non-erronuos blocks
+            printf("#DEBUG| Block[%d] -> (%d , %d) \n", i, blocks[i].filerefs, blocks[i].listrefs);/*Todo: DEBUG*/
+        }
+
+}
+
+void checkInodeList(){
+
+    //iterativer Durchgang durch die inodes
+
+    unsigned char blockBuffer[BLOCK_SIZE];
+    unsigned char * p;
+    //unsigned int maxFileSize;
+    unsigned int size;
+    unsigned int nlink;
+    unsigned int mode;
+    unsigned int addr;
+
+
+    for(int bi=2; bi < numInodes + 2 ; bi++ ){     // start at block 2 -> start of inode - table
+
+        readBlock(disk,bi,blockBuffer);
+        p = blockBuffer;
+
+        printf("block %d,", bi);
+        printf("________________________\n");
+
+        for (int ii = 0; ii < INOPB; ii++) {
+
+            if(bi==2){     //skip 1st inode of block 2
+                p+=16*4;
+                continue;
+            }
+
+            printf("inode [%d]: \n", ii + INOPB * (bi -2));
+
+            mode = get4Bytes(p);
+            p += 4; //mode
+
+            nlink = get4Bytes(p);       //nlink
+            p += 4;
+
+            p += 4;             //uid
+
+            p += 4;             //gid
+
+            p += 4;             //tim
+
+            p += 4;             //tim2
+
+            p += 4;             //tim3
+
+            size = get4Bytes(p);
+            p += 4;             //size
+
+            char * flag;
+
+            if( ((mode & IFMT) == IFDIR) ){
+                flag = "DIR";
+            } else if( ((mode & IFMT) == IFREG) ){
+                flag = "REG";
+            } else if( ((mode & IFMT) == IFBLK) ){
+                flag = "BLK";
+            } else if( ((mode & IFMT) == IFCHR) ){
+                flag = "BLK";
+            }
+            if( ((mode & IFMT) == IFFREE) ){
+                flag = "FREE";
+            }
+
+            printf("is %s, has %u links and size = %u \n", flag, nlink, size);
+
+            for (int j = 0; j < 6; j++) {
+                addr = get4Bytes(p);
+                p += 4;
+                if (addr != 0) {
+                    //maxFileSize +=BLOCK_SIZE;
+                    printf("  direct block[%1d] = %u (0x%X)\n", j, addr, addr);
+                }
+            }
+            addr = get4Bytes(p);
+            p += 4;
+            if (addr != 0) {
+                //maxFileSize += 1024 * BLOCK_SIZE;
+                printf("  single indirect = %u (0x%X)\n", addr, addr);
+            }
+            addr = get4Bytes(p);
+            p += 4;
+            if (addr != 0) {
+                // maxFileSize += 1024 * 1024 * BLOCK_SIZE;            //ggf überprüfen ob die Blöcke SELBST alle !=0 sind
+                printf("  double indirect = %u (0x%X)\n", addr, addr);
+            }
+
+            Inode * reference = &inodes[(bi-2) * INOPB + ii];     // get the inode to compare with from Inodes - list
+
+            //error-checking
+
+            fatalErrorIf( ((mode & IFMT) != IFDIR) && reference->refcount<=0, ERR_DIR_UNRBL, "Directory is unreachable from root");
+
+            // fatalErrorIf(size>maxFileSize, ERR_FILE_SIZE,"Filesize does not correspond to blocks");  //maybe check here to but I dont know how
+            fatalErrorIf(  (((mode & IFMT) != IFREG) && ((mode & IFMT) != IFDIR) && ((mode & IFMT) != IFCHR) && ((mode & IFMT) != IFBLK)), ERR_INN_ILL_TYPE, "Illegal Inode type");
+
+            fatalErrorIf( nlink==0 && reference->refcount < 0, ERR_IN0_IN_DIR,"Inode with linkcount 0 appears in directory");
+            fatalErrorIf( nlink==0 && ((mode & IFMT) == IFFREE), ERR_IN0_NOT_FREE,"Inode with linkcount 0 is not free");
+            fatalErrorIf( nlink!=0 && nlink != reference->refcount, ERR_INN_DIR_COUNT, "Inode does not appear in correct number of directories");
+            fatalErrorIf( reference->refcount && ((mode & IFMT) == IFFREE), ERR_INF_IN_DIR, "Inode appears in directory, despite being free ");
+
+        }
+    }
+
+
+}
 
 
 /*geklaut ende*/
@@ -355,48 +469,55 @@ int main(int argc, char *argv[]) {
     unsigned char * p;
   
     /*Exits if number of arguments doesn't equal 3 (progName, fileName, partitionNum)*/
-  	fatalErrorIf(argc!=3,ERR_WRONG_CALL, "Fehler 2a");
+  	fatalErrorIf(argc!=3,ERR_WRONG_CALL, "Not enough arguments ! \n"
+                                        "usage: ./hu2 <disk> <partition> \n"
+                                        "<disk> = name of EOS32 image file \n"
+                                        "<partition> = partition to inspect \n");
 
     diskName = argv[1];
     disk = fopen(diskName, "rb");
     
-  	fatalErrorIf(disk==NULL,ERR_IMG_NOT_FOUND, "Fehler 2b");
+  	fatalErrorIf(disk==NULL,ERR_IMG_NOT_FOUND, "Image file could not be found");
   	
     fseek(disk, 1 * SECTOR_SIZE, SEEK_SET);
     
-  	fatalErrorIf(fread(partTable, 1, SECTOR_SIZE, disk) != SECTOR_SIZE,ERR_FILE_IO, "Fehler 2c");
+  	fatalErrorIf(fread(partTable, 1, SECTOR_SIZE, disk) != SECTOR_SIZE,ERR_FILE_IO, "No Partition table found \n");
       
     /*Exits if partNum is to big or argv[1] is not an int*/
     char *rest;
     long arg2 = strtoul(argv[2], &rest, 10);
     if(arg2 > 15 || arg2 < 0 || *rest != '\0'){
-        fatalError(ERR_ILL_PART_NUM, "Fehler 2d");
+        fatalError(ERR_ILL_PART_NUM, "Illegal partition number \n");
     } else {
         partitionNum = arg2;
     }
-    printf("#DEBUG| partitionNum: %ld\n",arg2);/*Todo: DEBUG*/
 
     ptptr = partTable + partitionNum * 32;
     partType = get4Bytes(ptptr + 0);
     /*todo: check if partitionEntry is empty*/
 		
-  	fatalErrorIf(((partType & 0x7FFFFFFF) != 0x00000058), ERR_PART_NO_EOS, "Fehler 2e"); 
+  	fatalErrorIf(((partType & 0x7FFFFFFF) != 0x00000058), ERR_PART_NO_EOS, "Partition does not contain an EOS-Filesystem");
   
     fsStart = get4Bytes(ptptr + 4);
     
   	fsSize = get4Bytes(ptptr + 8);
-	fatalErrorIf(fsSize % SPB != 0,ERR_OTHER_FS, "Fehler 1m - File system size is not a multiple of block size.");   
+	fatalErrorIf(fsSize % SPB != 0,ERR_OTHER_FS, "File system size is not a multiple of block size.");
     
   	numBlocks = fsSize / SPB;
-  	fatalErrorIf(numBlocks <2, ERR_OTHER_FS, "Fehler 1m - File system has less than 2 blocks.");
+  	fatalErrorIf(numBlocks <2, ERR_OTHER_FS, "File system has less than 2 blocks.");
   
     /*Super block check*/
+    printf("Starting super block check \n");
+
     readBlock(disk, 1, blockBuffer); /*writes superblock to blockBuffer*/
     checkSuperBlock(blockBuffer);
-  	/*Super block check done*/
-  
-	printf("__________________________________\n");
-  	
+
+    /*Super block check done*/
+
+
+  	/*Start iteration through directories */
+  	printf("Starting recursive run trough directories \n");
+
     readBlock(disk, 2, blockBuffer);  /*writes inode-table-block to blockBuffer*/
     p = blockBuffer;
     p+=64; //skip inode 0
@@ -405,9 +526,19 @@ int main(int argc, char *argv[]) {
   	fatalErrorIf( (mode & IFMT) != IFDIR, ERR_ROOT_NO_DIR, "Das Root-Verzeichnis ist keine Directory !");
 	
   	checkInode(p, 1 + (2 * INOPB), TRUE); //start checking the directory-tree with the root-inode (inode 1 in block 2);
-  
-    debugPrintBlocks();//Todo: DEBUG!
-  
+    /*Inode iteration end*/
+
+  	debugPrintBlocks();//Todo: DEBUG!
+    debugPrintInodes();  //Todo: debugn
+
+    printf("Starting check for block - inconsistencies \n");
+    //checkBlockList();
+
+    printf("Starting check for inode - inconsistencies\n");
+    //checkInodeList();
+
     fclose(disk);
+
+    printf("File system check done: No errors detected. \n");
     return 0; 
 }

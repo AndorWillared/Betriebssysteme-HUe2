@@ -556,7 +556,7 @@ int main(int argc, char *argv[]) {
   if (fsSize % SPB != 0) {
     printf("File system size is not a multiple of block size.\n");
   }
-  numBlocks = fsSize / SPB;
+   numBlocks = fsSize / SPB;
   printf("This equals %u (0x%X) blocks of %d bytes each.\n",
          numBlocks, numBlocks, BLOCK_SIZE);
   if (numBlocks < 2) {
